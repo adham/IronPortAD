@@ -19,10 +19,10 @@ from tqdm import tqdm
 from collections import defaultdict
 
 
-def read_logfile(filename):
+def read_logfile(file_name):
     """Read a og file
     """
-    with open(filename, 'r') as fp:
+    with open(file_name, 'r') as fp:
         data = fp.readlines()
         data = [dd.strip() for dd in data]
 
@@ -112,10 +112,10 @@ def process_line(line, log_data):
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nchunks', type=int, default=5, help='divide each file to NCHUNKS')
+    parser.add_argument('--nchunks', type=int, default=200, help='divide each file to NCHUNKS')
     parser.add_argument('--date', type=str, help='date to parse')
-    parser.add_argument('--logs', type=str, default='/mnt/telstra/Data_2018/IronPort-ESA/')
-    parser.add_argument('--out', type=str, default='data/parsed/')
+    parser.add_argument('--logs', type=str)
+    parser.add_argument('--out', type=str)
     args = parser.parse_args()
 
     # get file name associated with date passed
@@ -124,7 +124,7 @@ def main():
     yy, mm, dd = args.date.split('-')
     log_dir = os.path.join(args.logs, yy, mm, dd)
     file_names = [os.path.join(dir_path, f) for dir_path, dir_names, files in os.walk(log_dir) \
-        for f in files if f.endswith('.s')]
+        for f in files if not f.endswith('.s')]
     print()
     print('{} files found'.format(len(file_names)))
 
@@ -136,6 +136,7 @@ def main():
     print()
     print('===> parsing')
     for file_name in tqdm(file_names, desc='files '):
+        log_data = read_logfile(file_name)
         file_len = int((subprocess.Popen('wc -l {}'.format(file_name), shell=True, stdout=subprocess.PIPE).stdout).readlines()[0].split()[0])
         chunk_size = file_len//args.nchunks
 
@@ -145,15 +146,15 @@ def main():
             if chunk_i == args.nchunks-1:
                 chunk_end = file_len-1
 
-            log_data = read_logfile(file_name)[chunk_start:chunk_end]
+            log_data_chunk = log_data[chunk_start:chunk_end]
 
             # find lines containing `From`
-            from_lines = find_from_lines(log_data)
+            from_lines = find_from_lines(log_data_chunk)
 
             # process lines
             data = []
             for line in tqdm(from_lines, desc='lines '):
-                data.append(process_line(line, log_data))
+                data.append(process_line(line, log_data_chunk))
 
             # write data to sender and recipient containers
             data = [d for d in data if d is not None]     # remove Nones
