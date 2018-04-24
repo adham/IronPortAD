@@ -112,7 +112,7 @@ def process_line(line, log_data):
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nchunks', type=int, default=200, help='divide each file to NCHUNKS')
+    parser.add_argument('--nlines', type=int, default=30000, help='number of lines to read per chunk')
     parser.add_argument('--date', type=str, help='date to parse')
     parser.add_argument('--logs', type=str)
     parser.add_argument('--out', type=str)
@@ -138,12 +138,12 @@ def main():
     for file_name in tqdm(file_names, desc='files '):
         log_data = read_logfile(file_name)
         file_len = int((subprocess.Popen('wc -l {}'.format(file_name), shell=True, stdout=subprocess.PIPE).stdout).readlines()[0].split()[0])
-        chunk_size = file_len//args.nchunks
+        nb_chunks = file_len//args.nlines
 
-        for chunk_i in tqdm(range(args.nchunks), desc='chunks'):
-            chunk_start = chunk_i*chunk_size
-            chunk_end = chunk_start + chunk_size
-            if chunk_i == args.nchunks-1:
+        for chunk_i in tqdm(range(nb_chunks), desc='chunks'):
+            chunk_start = chunk_i*args.nlines
+            chunk_end = chunk_start+args.nlines
+            if chunk_i == nb_chunks-1:
                 chunk_end = file_len-1
 
             log_data_chunk = log_data[chunk_start:chunk_end]
