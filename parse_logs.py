@@ -183,7 +183,6 @@ def main():
             else:
                 for to in dd[1][0]:
                     recipient_data[to].append(dd[1][1:])
-        print('len residues', len(data))
 
 
     # write data containers to disck
