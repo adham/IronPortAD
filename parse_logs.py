@@ -11,7 +11,7 @@ Better to use one CPU but launch many tasks simultaneasly.
 
 import os
 import re
-import sys
+import codecs
 import argparse
 import subprocess
 import pandas as pd
@@ -22,16 +22,17 @@ from collections import defaultdict
 def read_logfile(file_name):
     """Read a og file
     """
-    with open(file_name, 'r') as fp:
+    with codecs.open(file_name, 'r', encoding='utf-8', errors='ignore') as fp:
         data = fp.readlines()
         data = [dd.strip() for dd in data]
 
-    line = data[2]
-    line = line.split()
-    idx = line.index('seconds')
-    time_offset = int(line[idx-1])
+    # fidn time offset of the logfile
+    # line = data[2]
+    # line = line.split()
+    # idx = line.index('seconds')
+    # time_offset = int(line[idx-1])
 
-    return data[3:]
+    return data
 
 
 def find_from_lines(data):
@@ -137,9 +138,11 @@ def main():
     print('===> parsing')
     for file_name in tqdm(file_names, desc='files '):
         log_data = read_logfile(file_name)
-        file_len = int((subprocess.Popen('wc -l {}'.format(file_name), shell=True, stdout=subprocess.PIPE).stdout).readlines()[0].split()[0])
+        file_len = int((subprocess.Popen('wc -l {}'.format(file_name),
+            shell=True, stdout=subprocess.PIPE).stdout).readlines()[0].split()[0])
         nb_chunks = file_len//args.nlines
 
+        residue = []
         for chunk_i in tqdm(range(nb_chunks), desc='chunks'):
             chunk_start = chunk_i*args.nlines
             chunk_end = chunk_start+args.nlines
@@ -154,17 +157,34 @@ def main():
             # process lines
             data = []
             for line in tqdm(from_lines, desc='lines '):
-                data.append(process_line(line, log_data_chunk))
+                result = process_line(line, log_data_chunk)
+                if (result is None) or (result[1][0] is None):
+                    residue.append(line)
+                else:
+                    data.append(result)
 
             # write data to sender and recipient containers
-            data = [d for d in data if d is not None]     # remove Nones
-            data = []
             for dd in data:
                 if dd[0] == 'sent':
                     sender_data[dd[1][0]].append(dd[1][1:])
                 else:
                     for to in dd[1][0]:
                         recipient_data[to].append(dd[1][1:])
+
+        # parse residues
+        data = []
+        for line in residue:
+            result = process_line(line, log_data)
+            if (result is not None) and (result[1][0] is not None):
+                data.append(result)
+        for dd in data:
+            if dd[0] == 'sent':
+                sender_data[dd[1][0]].append(dd[1][1:])
+            else:
+                for to in dd[1][0]:
+                    recipient_data[to].append(dd[1][1:])
+        print('len residues', len(data))
+
 
     # write data containers to disck
     pd.to_pickle(sender_data, os.path.join(args.out, 'sender_data_{}.pkl'.format(args.date)))

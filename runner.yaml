@@ -1,0 +1,57 @@
+session_name: parsing
+windows:
+- window_name: parser
+  layout: tiled
+  shell_command_before:
+    - cd /home/adhamb/Dropbox/notes/telstra/IronPortAD
+    - snakes
+  panes:
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-01
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-02
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-03
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-04
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-05
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-06
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-07
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-08
+- window_name: parser
+  layout: tiled
+  shell_command_before:
+    - cd /home/adhamb/Dropbox/notes/telstra/IronPortAD
+    - snakes
+  panes:
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-09
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-10
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-11
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-12
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-13
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-14
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-15
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-16
+- window_name: parser
+  layout: tiled
+  shell_command_before:
+    - cd /home/adhamb/Dropbox/notes/telstra/IronPortAD
+    - snakes
+  panes:
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-17
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-18
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-19
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-20
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-21
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-22
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-23
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-24
+- window_name: parser
+  layout: tiled
+  shell_command_before:
+    - cd /home/adhamb/Dropbox/notes/telstra/IronPortAD
+    - snakes
+  panes:
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-25
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-26
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-27
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-28
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-29
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-30
+    - python parse_logs.py --logs /mnt/telstra/Data_2018/IronPort-ESA/ --out ~/ironport_data/ --date 2017-07-31
