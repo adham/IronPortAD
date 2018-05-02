@@ -5,8 +5,11 @@ Deakin University,
 PRaDA - Adham Beyki, odinay@gmail.com
 
 NOTE:
-Multiprocessing did not increase the speed that much to be worthy if sacrifying multiple CPUs.
-Better to use one CPU but launch many tasks simultaneasly.
+* Multiprocessing does not increase the speed that much to be worthy if sacrifying multiple CPUs.
+  Better to use one CPU but launch many tasks simultaneasly.
+* residues are often the result of a few emails for some reason can not be sent and finally are
+  aborted. I have tried different ways to process them, but it is not worth it. It takes a lot of
+  time and at the end, most of them still do not have all the parsed fields.
 """
 
 import os
@@ -84,9 +87,24 @@ def find_to(line, log_data):
     return out
 
 
+def find_byte_size(line, log_data):
+    """Find the size of email
+    """
+    mid = find_MID(line)
+    bytes_line = [l for l in log_data if 'MID {} ready'.format(mid) in l]
+    try:
+        bytes_line = bytes_line[0]
+        bytes_line = bytes_line.split(' ')
+        idx = bytes_line.index('bytes')
+        bsz = int(bytes_line[idx-1])
+    except:
+        bsz = None
+
+    return bsz
+
+
 def process_line(line, log_data):
 
-    out = None
     sender = find_email(line)
     if sender is not None:
 
@@ -95,25 +113,27 @@ def process_line(line, log_data):
             tos = find_to(line, log_data)
             try:
                 tt = find_time(line)
-                out = ['sent', [sender, tt, tos]]
+                bsz = find_byte_size(line, log_data)
+                out = ['sent', [sender, tt, tos, bsz]]
             except:
-                pass
+                out = None
 
         # 2. or recived by a telstra email
         else:
             tos = find_to(line, log_data)
+            bsz = find_byte_size(line, log_data)
             try:
                 tt = find_time(line)
-                out = ['received', [tos, tt, sender]]
+                out = ['received', [tos, tt, sender, bsz]]
             except:
-                pass
+                out = None
     return out
 
 
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nlines', type=int, default=30000, help='number of lines to read per chunk')
+    parser.add_argument('--nlines', type=int, default=20000, help='number of lines to read per chunk')
     parser.add_argument('--date', type=str, help='date to parse')
     parser.add_argument('--logs', type=str)
     parser.add_argument('--out', type=str)
@@ -136,29 +156,38 @@ def main():
     # loop through file names
     print()
     print('===> parsing')
+    old_residue = []
+    new_residue = []
+    residue = []
     for file_name in tqdm(file_names, desc='files '):
         log_data = read_logfile(file_name)
         file_len = int((subprocess.Popen('wc -l {}'.format(file_name),
             shell=True, stdout=subprocess.PIPE).stdout).readlines()[0].split()[0])
         nb_chunks = file_len//args.nlines
 
-        residue = []
         for chunk_i in tqdm(range(nb_chunks), desc='chunks'):
             chunk_start = chunk_i*args.nlines
             chunk_end = chunk_start+args.nlines
-            if chunk_i == nb_chunks-1:
+            if chunk_end > file_len-1:
                 chunk_end = file_len-1
 
             log_data_chunk = log_data[chunk_start:chunk_end]
-
             # find lines containing `From`
             from_lines = find_from_lines(log_data_chunk)
+
+            # now recalculate end to form log_data_chunk such that it covers 10% more lines
+            # than th eones used for finding email addresses
+            chunk_end = chunk_start+int(args.nlines*1.1)
+            if chunk_end > file_len-1:
+                chunk_end = filelen-1
+            log_data_chunk = log_data[chunk_start:chunk_end]
 
             # process lines
             data = []
             for line in tqdm(from_lines, desc='lines '):
                 result = process_line(line, log_data_chunk)
-                if (result is None) or (result[1][0] is None):
+                # if any of result, recipients, or bytes is None, add to residue
+                if (result is None) or (result[1][2] is None) or (result[1][3] is None):
                     residue.append(line)
                 else:
                     data.append(result)
@@ -170,20 +199,6 @@ def main():
                 else:
                     for to in dd[1][0]:
                         recipient_data[to].append(dd[1][1:])
-
-        # parse residues
-        data = []
-        for line in residue:
-            result = process_line(line, log_data)
-            if (result is not None) and (result[1][0] is not None):
-                data.append(result)
-        for dd in data:
-            if dd[0] == 'sent':
-                sender_data[dd[1][0]].append(dd[1][1:])
-            else:
-                for to in dd[1][0]:
-                    recipient_data[to].append(dd[1][1:])
-
 
     # write data containers to disck
     pd.to_pickle(sender_data, os.path.join(args.out, 'sender_data_{}.pkl'.format(args.date)))
