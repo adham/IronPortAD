@@ -168,9 +168,9 @@ def main():
         for chunk_i in tqdm(range(nb_chunks), desc='chunks'):
             chunk_start = chunk_i*args.nlines
             chunk_end = chunk_start+args.nlines
-            if chunk_end > file_len-1:
-                chunk_end = file_len-1
 
+            if chunk_i == nb_chunks-1:    # last chunk
+                chunk_end = file_len
             log_data_chunk = log_data[chunk_start:chunk_end]
             # find lines containing `From`
             from_lines = find_from_lines(log_data_chunk)
@@ -179,7 +179,7 @@ def main():
             # than th eones used for finding email addresses
             chunk_end = chunk_start+int(args.nlines*1.1)
             if chunk_end > file_len-1:
-                chunk_end = filelen-1
+                chunk_end = file_len
             log_data_chunk = log_data[chunk_start:chunk_end]
 
             # process lines
@@ -203,6 +203,7 @@ def main():
     # write data containers to disck
     pd.to_pickle(sender_data, os.path.join(args.out, 'sender_data_{}.pkl'.format(args.date)))
     pd.to_pickle(recipient_data, os.path.join(args.out, 'recipient_data_{}.pkl'.format(args.date)))
+    pd.to_pickle(residue, os.path.join(args.out, 'residue_data_{}.pkl'.format(args.date)))
 
 
 if __name__ == '__main__':
